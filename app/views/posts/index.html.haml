@@ -1,6 +1,6 @@
 %p#notice= notice
 %h1 Posts
-%table
+%table.table
   %thead
     %tr
       %th Title
@@ -11,8 +11,83 @@
       %tr
         %td= post.title
         %td= post.description
-        %td= link_to 'Show', post
-        %td= link_to 'Edit', edit_post_path(post)
-        %td= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' }
+        %td= link_to 'Show', post, class: 'btn btn-sm btn-secondary text-white'
+        %td= link_to 'Edit', edit_post_path(post), class: 'btn btn-sm btn-info text-white'
+        %td= link_to 'Destroy', post, method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger text-white'
 %br/
 = link_to 'New Post', new_post_path
+
+
+-# Vertical planner
+%h3 Planner
+-##planner
+  #planner_header.row.no-gutters
+    .offset-1.col-11
+      -# Months
+      .row.mb-1.no-gutters
+        - @planner[:headings][:months].each do |month|
+          %div{class:"col-#{month[1]*3}"}
+            .card.card-primary.card-inverse.text-center
+              .card-header
+                = month[0]
+      -# Week Headings
+      -#.row.mb-1.no-gutters
+        - @planner[:headings][:weeks].each do |week|
+          .col
+            .card.card-outline-primary.text-center
+              .card-header
+                = week[0].strftime("%d")
+  -# Days
+  - @planner[:rows].each_with_index do |row, row_index|
+    .row.no-gutters{id:"planner_row_#{row_index}"}
+      .col-1.d-flex.justify-content-center.align-items-center
+        = @planner[:headings][:weekdays][row_index][0]
+      .col-11
+        .row.no-gutters
+          - row.each_with_index do |day, col_index|
+            .col-3
+              .card
+                .pb-5= day[0].strftime('%e')
+
+
+
+-# Normal build planner columns
+-# Need to fix the spacing for the month row columns
+-#%div
+-#  .row
+-#    .col
+-#    - months = @planner.first.map{|x| x[0].strftime("%B")}
+-#    - months.group_by{|x| x}.map {|k, v| [k,v.size]}.each do |month|
+-#      .col{colspan: month[1], style: "background-color: #D3D3D3;"}
+-#        = month[0]
+-#  - @planner.each do |line|
+-#    .row
+-#      .col
+-#        = line.first[0].strftime("%A")
+-#      - line.each do |day|
+-#        .col.border
+-#          = day[0].strftime('%e')
+-#          = day[1][1].try(:title)
+
+
+
+-# Build planner table
+%table.table.table-bordered.table-striped
+  %tbody
+    %tr
+      %th
+        - months = @planner.first.map{|x| x[0].strftime("%B")}
+        - months.group_by{|x| x}.map {|k, v| [k,v.size]}.each do |month|
+          %th{:colspan => month[1]}
+            = month[0]
+    -#%tr
+      %th
+        - @planner.first.each do |day|
+          %th= day[0].strftime("%d")
+    - @planner.each do |line|
+      %tr
+        %th= line.first[0].strftime("%A")
+        - line.each do |day|
+          %td.active
+            = day[0].strftime('%e')
+            = day[1][1].try(:title)

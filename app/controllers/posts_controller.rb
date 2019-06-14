@@ -1,10 +1,16 @@
 class PostsController < ApplicationController
+  include Planner
   before_action :set_post, only: [:show, :edit, :update, :destroy]
 
   # GET /posts
   # GET /posts.json
   def index
     @posts = Post.all
+    # Table planner
+    @planner = build_planner
+
+    # Vertical planner
+    # @planner = vertical_planner(0, Date.today,3)
   end
 
   # GET /posts/1
@@ -70,5 +76,19 @@ class PostsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def post_params
       params.require(:post).permit(:title, :description)
+    end
+
+
+    def today_posts(todays_date)
+      Post.where(created_at: todays_date.beginning_of_day..todays_date.end_of_day)
+    end
+
+    def build_planner(past_weeks=1, seldate=Time.zone.now, future_weeks=4)
+      start_date = (seldate.to_date - (past_weeks * 7).days).monday
+      end_date = start_date + ((past_weeks + 1 + future_weeks) * 7).days - 1.day
+      result = (start_date .. end_date).to_a.map do |date|
+            [date, today_results(date)]
+      end
+      result.each_slice(7).to_a.transpose
     end
 end
